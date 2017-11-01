@@ -1,0 +1,52 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+ http://www.springframework.org/schema/security
+ http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+
+    <http auto-config="true">
+        <intercept-url pattern="/login" access="permitAll()"/>
+        <intercept-url pattern="/registration" access="permitAll()"/>
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <!--<intercept-url pattern="/login" access="permitAll()"/>-->
+        <form-login
+                login-page="/login"
+                username-parameter="login"
+                password-parameter="password"
+                authentication-success-forward-url="/loginSuccessful"
+                authentication-failure-forward-url="/" />
+        <logout logout-url="/logout" logout-success-url="/login"/>
+        <csrf disabled="true"/>
+    </http>
+
+    <beans:bean id = "datasource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <beans:property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+        <beans:property name="url" value="jdbc:sqlserver://localhost\SQLEXPRESS:1433;database=my_portal_test"/>
+        <beans:property name="username" value="admin"/>
+        <beans:property name="password" value="strongpass"/>
+    </beans:bean>
+
+    <authentication-manager>
+        <authentication-provider user-service-ref="customUserDetailsService">
+            <password-encoder ref="passwordEncoder"/>
+        </authentication-provider>
+    </authentication-manager>
+
+
+    <!--<authentication-manager>-->
+        <!--<authentication-provider>-->
+            <!--<jdbc-user-service data-source-ref="datasource"-->
+                               <!--users-by-username-query="SELECT login, password FROM users where login = ?"-->
+                               <!--authorities-by-username-query="SELECT users.login, users.password, roles.role-->
+                                                                <!--FROM   users INNER JOIN-->
+                         <!--roles ON users.role_id = roles.id-->
+                    <!--where login = ?"/>-->
+            <!--<password-encoder ref="passwordEncoder"/>-->
+        <!--</authentication-provider>-->
+    <!--</authentication-manager>-->
+
+    <beans:bean id="passwordEncoder" class="com.innopo.Services.CustomPasswordEncoder"/>
+    <beans:bean id="customUserDetailsService" class="com.innopo.Services.CustomUserDetailService" autowire="constructor"/>
+</beans:beans>
